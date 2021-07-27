@@ -1,22 +1,62 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Chapter_07
 {
     class Configuration
     {
-        private readonly int min;
-        private readonly int max;
+        List<ItemValue> listConfig = new List<ItemValue>();
 
-        public Configuration(int v1, int v2)
+        public void SetConfig(string item, string value)
         {
-            min = v1;
-            max = v2;
-            // 읽기전용필드는 생성자에서만 초기화가능s
+            ItemValue iv = new ItemValue();
+            iv.SetValue(this, item, value);
         }
 
-        public void ChangeMax(int newMax)
+        public string GetConfig(string item)
         {
-            // max = newMax; 생성자가 아닌 곳에서 변수값 수정시 오류 발생
+            foreach (ItemValue iv in listConfig)
+            {
+                if (iv.GetItem() == item)
+                    return iv.GetValue();
+            }
+            return "";
+        }
+
+        private class ItemValue
+        {
+            private string item;
+            private string value;
+
+            public void SetValue(Configuration config, string item, string value)
+            {
+                this.item = item;
+                this.value = value;
+
+                bool found = false;
+                for (int i = 0; i < config.listConfig.Count; i++)
+                {
+                    if (config.listConfig[i].item == item)
+                    {
+                        config.listConfig[i] = this;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false)
+                    config.listConfig.Add(this);
+            }
+
+            public string GetItem()
+            {
+                return item;
+            }
+
+            public string GetValue()
+            {
+                return value;
+            }
         }
     }
 
@@ -24,7 +64,15 @@ namespace Chapter_07
     {
         static void Main(string[] args)
         {
-            Configuration c = new Configuration(100, 10);
+            Configuration config = new Configuration();
+            config.SetConfig("Version", "V 5.0");
+            config.SetConfig("Size", "655,324 KB");
+
+            Console.WriteLine(config.GetConfig("Version"));
+            Console.WriteLine(config.GetConfig("Size"));
+
+            config.SetConfig("Version", "V 5.0.1");
+            Console.WriteLine(config.GetConfig("Version"));
         }
     }
 }
